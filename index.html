@@ -26,8 +26,10 @@ table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 .del{background:#e63946;color:#fff;padding:5px 10px;font-size:14px;border-radius:6px}
 .lane{background:#eef2f6;border:3px solid #adb5bd;border-radius:24px;padding:15px 10px;margin:10px auto;max-width:340px}
-.row{display:flex;justify-content:center;gap:16px;margin:10px 0}
-.pin{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;box-shadow:0 3px 6px rgba(0,0,0,0.25)}
+.row{display:flex;justify-content:center;gap:16px;margin:12px 0}
+.pin{width:46px;height:46px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;box-shadow:0 3px 6px rgba(0,0,0,0.25);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform 0.1s;box-sizing:border-box}
+.pin:active{transform:scale(0.92)}
+.pin.sel{outline:4px solid #ff6b6b;outline-offset:2px;transform:scale(1.12)}
 .p-y{background:#ffb703;color:#222}
 .p-r{background:#e63946;color:#fff}
 .p-b{background:#1d3557;color:#fff}
@@ -35,8 +37,12 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 .p-p{background:#7209b7;color:#fff}
 .p-k{background:#212529;color:#fff}
 .throw{margin-top:12px;padding-top:8px;border-top:2px dashed #adb5bd;color:#495057;font-weight:bold;font-size:15px}
-.cnt{background:#fff;padding:8px;border-radius:10px;margin-top:10px;font-size:15px;font-weight:bold;color:#1d3557}
-.note{background:#ffe5ec;color:#d90429;padding:6px;border-radius:8px;font-weight:bold;margin-top:8px;font-size:16px}
+.cnt{background:#fff;padding:10px;border-radius:10px;margin-top:10px;font-size:15px;font-weight:bold;color:#1d3557;line-height:1.6}
+.note{background:#ffe5ec;color:#d90429;padding:8px;border-radius:8px;font-weight:bold;margin-top:8px;font-size:15px}
+.picker-box{background:#fff;border:3px solid #1d3557;border-radius:16px;padding:12px;margin:12px auto;max-width:360px;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.picker-title{font-size:16px;font-weight:bold;color:#1d3557;margin-bottom:10px}
+.picker-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.picker-btn{padding:12px 4px;font-size:16px;border-radius:10px;font-weight:bold}
 .step{text-align:left;background:#f8f9fa;border-left:6px solid #1d3557;padding:14px;border-radius:10px;margin-bottom:14px}
 .say{font-size:20px;font-weight:bold;color:#1d3557;line-height:1.5}
 .cus{font-size:16px;color:#666;margin:6px 0}
@@ -124,7 +130,7 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
     <div class="tabs">
       <button id="t0" class="tab act" onclick="swTab('all')">すべて</button>
       <button id="t1" class="tab" onclick="swTab('一般')">一般</button>
-      <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</option></button>
+      <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</button>
     </div>
     <table>
       <thead><tr><th>順位</th><th>なまえ</th><th>区分</th><th>点数</th><th>削除</th></tr></thead>
@@ -143,31 +149,117 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 <!-- ページ2: ピン配置 -->
 <div id="p2" class="hide">
   <div class="lane">
-    <div class="row"><span class="pin p-p">50</span><span class="pin p-r">40</span><span class="pin p-r">40</span><span class="pin p-p">50</span></div>
-    <div class="row"><span class="pin p-b">30</span><span class="pin p-k">-10</span><span class="pin p-b">30</span></div>
-    <div class="row"><span class="pin p-y">20</span><span class="pin p-y">20</span></div>
-    <div class="row"><span class="pin p-w">0</span></div>
+    <div id="pinRows"></div>
     <div class="throw">⬆️ ここからボールを投げる（2投制）</div>
   </div>
-  <div class="cnt">紫50点 / 赤40点 / 青30点 / 黄20点 / 黒-10点 / 白0点</div>
-  <div class="note">※ カメラ自動読み取り、または下の色ボタンで合計点を計算します</div>
+
+  <div id="pinPicker" class="picker-box hide">
+    <div class="picker-title" id="pickerTitle">変更する色を選択してください</div>
+    <div class="picker-grid">
+      <button class="picker-btn p-p" onclick="setSelectedPinColor(0)">紫 (50)</button>
+      <button class="picker-btn p-r" onclick="setSelectedPinColor(1)">赤 (40)</button>
+      <button class="picker-btn p-b" onclick="setSelectedPinColor(2)">青 (30)</button>
+      <button class="picker-btn p-y" onclick="setSelectedPinColor(3)">黄 (20)</button>
+      <button class="picker-btn p-k" onclick="setSelectedPinColor(4)">黒 (-10)</button>
+      <button class="picker-btn p-w" onclick="setSelectedPinColor(5)">白 (0)</button>
+    </div>
+    <button onclick="closePinPicker()" style="background:#dee2e6;color:#333;width:100%;padding:8px;font-size:15px;margin-top:8px">閉じる</button>
+  </div>
+
+  <div class="cnt" id="pinCountInfo"></div>
+  <div class="note">※ 変更したいピンをタップして、下のボタンから色を選択してください</div>
+  <div class="c">
+    <button onclick="resetPinLayout()" style="background:#6c757d;font-size:16px">🔄 初期配置に戻す</button>
+  </div>
 </div>
 
 <script>
 var PIN_TYPES = [
-  { key: 'purple', label: '紫', pt: 50, mark: '#7209b7' },
-  { key: 'red',    label: '赤', pt: 40, mark: '#e63946' },
-  { key: 'blue',   label: '青', pt: 30, mark: '#1d3557' },
-  { key: 'yellow', label: '黄', pt: 20, mark: '#ffb703' },
-  { key: 'black',  label: '黒', pt: -10, mark: '#212529' },
-  { key: 'white',  label: '白', pt: 0,  mark: '#adb5bd' }
+  { key: 'purple', label: '紫', pt: 50, cls: 'p-p', mark: '#7209b7' },
+  { key: 'red',    label: '赤', pt: 40, cls: 'p-r', mark: '#e63946' },
+  { key: 'blue',   label: '青', pt: 30, cls: 'p-b', mark: '#1d3557' },
+  { key: 'yellow', label: '黄', pt: 20, cls: 'p-y', mark: '#ffb703' },
+  { key: 'black',  label: '黒', pt: -10, cls: 'p-k', mark: '#212529' },
+  { key: 'white',  label: '白', pt: 0,  cls: 'p-w', mark: '#adb5bd' }
 ];
+
+var DEFAULT_LAYOUT = [0, 1, 1, 0, 2, 4, 2, 3, 3, 5];
+var pinLayout = DEFAULT_LAYOUT.slice();
+var selectedPinIdx = -1;
 
 var hist = [];
 var currentTab = 'all';
 var camStream = null;
 var detCounts = { purple: 0, red: 0, blue: 0, yellow: 0, black: 0, white: 0 };
 var KEY = 'color_pin_ranking_v2';
+var LAYOUT_KEY = 'color_pin_layout_v1';
+
+function loadPinLayout() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(LAYOUT_KEY));
+    if (Array.isArray(saved) && saved.length === 10) {
+      pinLayout = saved;
+    }
+  } catch (e) {}
+}
+
+function savePinLayout() {
+  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(pinLayout)); } catch (e) {}
+}
+
+function selectPin(idx) {
+  selectedPinIdx = idx;
+  renderPins();
+  var picker = document.getElementById('pinPicker');
+  picker.className = 'picker-box';
+  document.getElementById('pickerTitle').textContent = (idx + 1) + '番のピンの色を選択';
+}
+
+function setSelectedPinColor(typeIdx) {
+  if (selectedPinIdx < 0 || selectedPinIdx >= 10) return;
+  pinLayout[selectedPinIdx] = typeIdx;
+  savePinLayout();
+  closePinPicker();
+}
+
+function closePinPicker() {
+  selectedPinIdx = -1;
+  document.getElementById('pinPicker').className = 'picker-box hide';
+  renderPins();
+}
+
+function resetPinLayout() {
+  if (!confirm('ピン配置を初期状態に戻しますか？')) return;
+  pinLayout = DEFAULT_LAYOUT.slice();
+  savePinLayout();
+  closePinPicker();
+}
+
+function renderPins() {
+  var rows = [[0, 1, 2, 3], [4, 5, 6], [7, 8], [9]];
+  var html = '';
+  for (var r = 0; r < rows.length; r++) {
+    html += '<div class="row">';
+    for (var c = 0; c < rows[r].length; c++) {
+      var idx = rows[r][c];
+      var t = PIN_TYPES[pinLayout[idx]] || PIN_TYPES[0];
+      var selCls = (idx === selectedPinIdx) ? ' sel' : '';
+      html += '<span class="pin ' + t.cls + selCls + '" onclick="selectPin(' + idx + ')">' + t.pt + '</span>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('pinRows').innerHTML = html;
+
+  var counts = [0, 0, 0, 0, 0, 0];
+  for (var i = 0; i < pinLayout.length; i++) {
+    counts[pinLayout[i]]++;
+  }
+  var summary = [];
+  for (var k = 0; k < PIN_TYPES.length; k++) {
+    summary.push(PIN_TYPES[k].label + '(' + PIN_TYPES[k].pt + '点):' + counts[k] + '本');
+  }
+  document.getElementById('pinCountInfo').textContent = summary.join(' / ');
+}
 
 function swPage(idx) {
   for (var i = 0; i < 3; i++) {
@@ -508,6 +600,8 @@ function applyDetected() {
   closeCam();
 }
 
+loadPinLayout();
+renderPins();
 renderRanks();
 </script>
 </body>
