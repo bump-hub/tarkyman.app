@@ -1,1 +1,174 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>色点数ランキング</title><style>body{font-family:sans-serif;text-align:center;background:#f0f4f8;padding:12px;max-width:600px;margin:auto}.nav{display:flex;gap:8px;margin-bottom:15px}.nav button{flex:1;padding:14px 5px;font-size:17px;border-radius:12px;background:#dee2e6;color:#333}.nav button.act{background:#1d3557;color:#fff}#s{font-size:52px;font-weight:bold;margin:5px}#h{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;min-height:22px}.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{font-size:19px;font-weight:bold;padding:16px 5px;border:none;border-radius:12px;cursor:pointer}.c{display:flex;gap:10px;margin-top:10px}.c button{flex:1;background:#555;color:#fff;padding:14px}.cam-btn{background:#ff6b6b;color:#fff;width:100%;margin-bottom:10px;font-size:19px}.box{background:#fff;padding:15px;border-radius:15px;margin-top:15px;box-shadow:0 3px 8px rgba(0,0,0,0.1)}select,input{font-size:18px;padding:10px;border-radius:8px;border:2px solid #ccc;margin:5px}.tabs{display:flex;gap:8px;margin-bottom:10px}.tab{flex:1;padding:12px;font-size:17px;background:#e9ecef;color:#333;border-radius:10px}.tab.act{background:#1d3557;color:#fff}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}.del{background:#e63946;color:#fff;padding:5px 10px;font-size:14px;border-radius:6px}.lane{background:#eef2f6;border:3px solid #adb5bd;border-radius:24px;padding:15px 10px;margin:10px auto;max-width:340px}.row{display:flex;justify-content:center;gap:16px;margin:10px 0}.pin{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;box-shadow:0 3px 6px rgba(0,0,0,0.25)}.p-y{background:#ffb703;color:#222}.p-r{background:#e63946;color:#fff}.p-b{background:#1d3557;color:#fff}.p-w{background:#ffffff;color:#333;border:2px solid #999}.p-p{background:#7209b7;color:#fff}.throw{margin-top:12px;padding-top:8px;border-top:2px dashed #adb5bd;color:#495057;font-weight:bold;font-size:15px}.cnt{background:#fff;padding:8px;border-radius:10px;margin-top:10px;font-size:15px;font-weight:bold;color:#1d3557}.note{background:#ffe5ec;color:#d90429;padding:6px;border-radius:8px;font-weight:bold;margin-top:8px;font-size:16px}.step{text-align:left;background:#f8f9fa;border-left:6px solid #1d3557;padding:14px;border-radius:10px;margin-bottom:14px}.say{font-size:20px;font-weight:bold;color:#1d3557;line-height:1.5}.cus{font-size:16px;color:#666;margin:6px 0}.res{background:#fff3cd;border:2px solid #ffc107;padding:12px;border-radius:10px;font-size:22px;font-weight:bold;color:#d90429;margin:10px 0}</style></head><body><div class="nav"><button id="n0" class="act" onclick="swPage(0)">🎳 点数・ランキング</button><button id="n1" onclick="swPage(1)">🗣�%B
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>色点数ランキング</title>
+<style>
+body{font-family:sans-serif;text-align:center;background:#f0f4f8;padding:12px;max-width:600px;margin:auto}
+.nav{display:flex;gap:8px;margin-bottom:15px}
+.nav button{flex:1;padding:14px 5px;font-size:17px;border-radius:12px;background:#dee2e6;color:#333}
+.nav button.act{background:#1d3557;color:#fff}
+#s{font-size:52px;font-weight:bold;margin:5px}
+#h{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;min-height:22px;font-size:16px;color:#333}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font-size:19px;font-weight:bold;padding:16px 5px;border:none;border-radius:12px;cursor:pointer}
+button:active{opacity:0.8;transform:scale(0.98)}
+.c{display:flex;gap:10px;margin-top:10px}
+.c button{flex:1;background:#555;color:#fff;padding:14px}
+.cam-btn{background:#ff6b6b;color:#fff;width:100%;margin-bottom:10px;font-size:19px}
+.box{background:#fff;padding:15px;border-radius:15px;margin-top:15px;box-shadow:0 3px 8px rgba(0,0,0,0.1)}
+select,input{font-size:18px;padding:10px;border-radius:8px;border:2px solid #ccc;margin:5px}
+.tabs{display:flex;gap:8px;margin-bottom:10px}
+.tab{flex:1;padding:12px;font-size:17px;background:#e9ecef;color:#333;border-radius:10px}
+.tab.act{background:#1d3557;color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
+.del{background:#e63946;color:#fff;padding:5px 10px;font-size:14px;border-radius:6px}
+.lane{background:#eef2f6;border:3px solid #adb5bd;border-radius:24px;padding:15px 10px;margin:10px auto;max-width:340px}
+.row{display:flex;justify-content:center;gap:16px;margin:10px 0}
+.pin{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:17px;box-shadow:0 3px 6px rgba(0,0,0,0.25)}
+.p-y{background:#ffb703;color:#222}
+.p-r{background:#e63946;color:#fff}
+.p-b{background:#1d3557;color:#fff}
+.p-w{background:#ffffff;color:#333;border:2px solid #999}
+.p-p{background:#7209b7;color:#fff}
+.throw{margin-top:12px;padding-top:8px;border-top:2px dashed #adb5bd;color:#495057;font-weight:bold;font-size:15px}
+.cnt{background:#fff;padding:8px;border-radius:10px;margin-top:10px;font-size:15px;font-weight:bold;color:#1d3557}
+.note{background:#ffe5ec;color:#d90429;padding:6px;border-radius:8px;font-weight:bold;margin-top:8px;font-size:16px}
+.step{text-align:left;background:#f8f9fa;border-left:6px solid #1d3557;padding:14px;border-radius:10px;margin-bottom:14px}
+.say{font-size:20px;font-weight:bold;color:#1d3557;line-height:1.5}
+.cus{font-size:16px;color:#666;margin:6px 0}
+.res{background:#fff3cd;border:2px solid #ffc107;padding:12px;border-radius:10px;font-size:22px;font-weight:bold;color:#d90429;margin:10px 0}
+.hide{display:none}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <button id="n0" class="act" onclick="swPage(0)">🎳 点数・ランキング</button>
+  <button id="n1" onclick="swPage(1)">🗣️ 進行・声かけ</button>
+  <button id="n2" onclick="swPage(2)">🎯 ピン配置</button>
+</div>
+
+<!-- ページ0: 点数・ランキング -->
+<div id="p0">
+  <button class="cam-btn" onclick="toggleCam()">📷 カメラ確認（オン / オフ）</button>
+  <div id="camBox" class="box hide" style="margin-top:0;margin-bottom:12px;">
+    <video id="vid" autoplay playsinline style="width:100%;border-radius:10px;max-height:220px;object-fit:cover;"></video>
+  </div>
+
+  <div>現在の合計点数</div>
+  <div id="s">0</div>
+  <div id="h">履歴：まだ倒していません</div>
+
+  <div class="g">
+    <button class="p-w" onclick="addPt('白', 10)">⚪ 白ピン (+10)</button>
+    <button class="p-y" onclick="addPt('黄', 20)">🟡 黄ピン (+20)</button>
+    <button class="p-r" onclick="addPt('赤', 30)">🔴 赤ピン (+30)</button>
+    <button class="p-b" onclick="addPt('青', 50)">🔵 青ピン (+50)</button>
+    <button class="p-p" onclick="addPt('紫', 100)">🟣 紫ピン (+100)</button>
+    <button style="background:#2a9d8f;color:#fff;" onclick="addPt('ストライク', 50)">✨ ボーナス (+50)</button>
+  </div>
+
+  <div class="c">
+    <button onclick="undo()">↩️ 1つ戻す</button>
+    <button style="background:#e63946;" onclick="resetScore()">🗑️ 点数リセット</button>
+  </div>
+
+  <div class="box">
+    <div style="font-weight:bold;font-size:19px;margin-bottom:8px;">🏆 ランキング登録</div>
+    <div>
+      <input id="playerName" type="text" placeholder="なまえ（例：たろう）" style="width:60%;">
+      <select id="playerCat">
+        <option value="一般">一般</option>
+        <option value="キッズ">キッズ</option>
+      </select>
+    </div>
+    <button onclick="saveRank()" style="background:#1d3557;color:#fff;width:100%;margin-top:8px;">この点数で登録する</button>
+  </div>
+
+  <div class="box">
+    <div class="tabs">
+      <button id="t0" class="tab act" onclick="swTab('all')">すべて</button>
+      <button id="t1" class="tab" onclick="swTab('一般')">一般</button>
+      <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>順位</th>
+          <th>なまえ</th>
+          <th>区分</th>
+          <th>点数</th>
+          <th>削除</th>
+        </tr>
+      </thead>
+      <tbody id="rankBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ページ1: 進行・声かけ -->
+<div id="p1" class="hide">
+  <div class="step">
+    <div class="cus">① 受付・スタート時</div>
+    <div class="say">「ボールを2回投げて、倒れたピンの色の合計点を競います！準備ができたらどうぞ！」</div>
+  </div>
+  <div class="step">
+    <div class="cus">② 1投目のあと</div>
+    <div class="say">「ナイスショット！倒れたピンの点数を記録しますね。そのまま2投目もどうぞ！」</div>
+  </div>
+  <div class="step">
+    <div class="cus">③ 2投目終了・結果発表</div>
+    <div class="say">「お疲れさまでした！今回の合計得点はこちらです！」</div>
+    <div class="res" id="resScore">合計：0 点</div>
+  </div>
+</div>
+
+<!-- ページ2: ピン配置 -->
+<div id="p2" class="hide">
+  <div class="lane">
+    <div class="row">
+      <span class="pin p-p">100</span>
+      <span class="pin p-b">50</span>
+      <span class="pin p-b">50</span>
+      <span class="pin p-p">100</span>
+    </div>
+    <div class="row">
+      <span class="pin p-r">30</span>
+      <span class="pin p-y">20</span>
+      <span class="pin p-r">30</span>
+    </div>
+    <div class="row">
+      <span class="pin p-y">20</span>
+      <span class="pin p-y">20</span>
+    </div>
+    <div class="row">
+      <span class="pin p-w">10</span>
+    </div>
+    <div class="throw">⬆️ ここからボールを投げる（2投制）</div>
+  </div>
+  <div class="cnt">白1本 / 黄3本 / 赤2本 / 青2本 / 紫2本（計10本）</div>
+  <div class="note">※ 倒れたピンの色ボタンを押して合計点を計算してください</div>
+</div>
+
+<script>
+let hist = [];
+let currentTab = 'all';
+let camStream = null;
+const STORAGE_KEY = 'color_pin_ranking_v1';
+
+function swPage(idx) {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('p' + i).classList.toggle('hide', i !== idx);
+    document.getElementById('n' + i).classList.toggle('act', i === idx);
+  }
+}
+
+function updateDisplay() {
+  const total = hist.reduce((sum, item) => sum + item.pt, 0);
+  document.getElementById('s').textContent = total;
+  document.getElementById('resScore').textContent = '合計：' + total + ' 点';
+  document.getElementById('h').textContent = hist.length
+    ? '履歴：' + hist
