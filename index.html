@@ -13,6 +13,7 @@ body{font-family:sans-serif;text-align:center;background:#f0f4f8;padding:12px;ma
 #h{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;min-height:22px;font-size:16px;color:#333}
 .g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 button{font-size:19px;font-weight:bold;padding:16px 5px;border:none;border-radius:12px;cursor:pointer}
+button:active{opacity:0.85}
 .c{display:flex;gap:10px;margin-top:10px}
 .c button{flex:1;background:#555;color:#fff;padding:14px}
 .cam-btn{background:#ff6b6b;color:#fff;width:100%;margin-bottom:10px;font-size:19px}
@@ -32,6 +33,7 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 .p-b{background:#1d3557;color:#fff}
 .p-w{background:#ffffff;color:#333;border:2px solid #999}
 .p-p{background:#7209b7;color:#fff}
+.p-k{background:#212529;color:#fff}
 .throw{margin-top:12px;padding-top:8px;border-top:2px dashed #adb5bd;color:#495057;font-weight:bold;font-size:15px}
 .cnt{background:#fff;padding:8px;border-radius:10px;margin-top:10px;font-size:15px;font-weight:bold;color:#1d3557}
 .note{background:#ffe5ec;color:#d90429;padding:6px;border-radius:8px;font-weight:bold;margin-top:8px;font-size:16px}
@@ -40,45 +42,89 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 .cus{font-size:16px;color:#666;margin:6px 0}
 .res{background:#fff3cd;border:2px solid #ffc107;padding:12px;border-radius:10px;font-size:22px;font-weight:bold;color:#d90429;margin:10px 0}
 .hide{display:none}
+.cam-wrap{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#000}
+.cam-guide{position:absolute;top:12%;left:10%;width:80%;height:76%;border:3px dashed rgba(255,255,255,0.85);border-radius:12px;pointer-events:none;box-sizing:border-box}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.det-item{display:flex;align-items:center;justify-content:space-between;background:#f8f9fa;padding:8px 10px;border-radius:10px;border:1px solid #dee2e6;font-size:15px;font-weight:bold}
+.det-adj{display:flex;align-items:center;gap:6px}
+.det-adj button{padding:4px 10px;font-size:16px;border-radius:6px;background:#dee2e6;color:#222}
 </style>
 </head>
 <body>
+
 <div class="nav">
   <button id="n0" class="act" onclick="swPage(0)">🎳 点数・ランキング</button>
   <button id="n1" onclick="swPage(1)">🗣️ 進行・声かけ</button>
   <button id="n2" onclick="swPage(2)">🎯 ピン配置</button>
 </div>
+
+<!-- ページ0: 点数・ランキング -->
 <div id="p0">
-  <button class="cam-btn" onclick="toggleCam()">📷 カメラ確認（オン / オフ）</button>
-  <div id="camBox" class="box hide" style="margin-top:0;margin-bottom:12px">
-    <video id="vid" autoplay playsinline style="width:100%;border-radius:10px;max-height:220px;object-fit:cover"></video>
+  <button class="cam-btn" onclick="openCam()">📷 カメラでピンの色を自動読み取り</button>
+
+  <div id="camBox" class="box hide" style="margin-top:0;margin-bottom:14px">
+    <div id="liveArea">
+      <div style="font-size:14px;color:#555;margin-bottom:6px">枠内に倒れたピンが映るようにして撮影してください</div>
+      <div class="cam-wrap">
+        <video id="vid" autoplay playsinline muted style="width:100%;display:block;max-height:260px;object-fit:cover"></video>
+        <div class="cam-guide"></div>
+      </div>
+      <div class="c">
+        <button onclick="captureAndDetect()" style="background:#e63946">📸 撮影して色を自動判定</button>
+        <button onclick="closeCam()" style="background:#6c757d">閉じる</button>
+      </div>
+    </div>
+
+    <div id="fileFallback" class="hide" style="margin-top:8px">
+      <label style="display:inline-block;background:#1d3557;color:#fff;padding:12px 18px;border-radius:10px;font-weight:bold;font-size:17px;cursor:pointer">
+        📷 カメラを起動して撮影する
+        <input type="file" accept="image/*" capture="environment" onchange="handleFile(this)" style="display:none">
+      </label>
+      <button onclick="closeCam()" style="background:#6c757d;color:#fff;padding:12px 16px;font-size:16px;margin-left:6px">閉じる</button>
+    </div>
+
+    <div id="resultArea" class="hide">
+      <div style="font-size:14px;color:#555;margin-bottom:6px">判定結果（違いがあれば ＋/− で調整できます）</div>
+      <canvas id="cvs" style="width:100%;border-radius:10px;border:1px solid #ccc"></canvas>
+      <div id="detSummary" style="font-weight:bold;font-size:18px;color:#1d3557;margin-top:8px"></div>
+      <div class="det-grid" id="detControls"></div>
+      <div class="c">
+        <button onclick="applyDetected()" style="background:#2a9d8f">✅ この点数を加算する</button>
+        <button onclick="retakeCam()" style="background:#555">🔄 撮り直す</button>
+      </div>
+    </div>
   </div>
+
   <div>現在の合計点数</div>
   <div id="s">0</div>
   <div id="h">履歴：まだ倒していません</div>
+
   <div class="g">
-    <button class="p-w" onclick="addPt('白',10)">⚪ 白ピン (+10)</button>
-    <button class="p-y" onclick="addPt('黄',20)">🟡 黄ピン (+20)</button>
-    <button class="p-r" onclick="addPt('赤',30)">🔴 赤ピン (+30)</button>
-    <button class="p-b" onclick="addPt('青',50)">🔵 青ピン (+50)</button>
-    <button class="p-p" onclick="addPt('紫',100)">🟣 紫ピン (+100)</button>
-    <button style="background:#2a9d8f;color:#fff" onclick="addPt('ボーナス',50)">✨ ボーナス (+50)</button>
+    <button class="p-p" onclick="addPt('紫',50)">🟣 紫 (+50点)</button>
+    <button class="p-r" onclick="addPt('赤',40)">🔴 赤 (+40点)</button>
+    <button class="p-b" onclick="addPt('青',30)">🔵 青 (+30点)</button>
+    <button class="p-y" onclick="addPt('黄',20)">🟡 黄 (+20点)</button>
+    <button class="p-k" onclick="addPt('黒',-10)">⚫ 黒 (-10点)</button>
+    <button class="p-w" onclick="addPt('白',0)">⚪ 白 (0点)</button>
   </div>
+
   <div class="c">
     <button onclick="undo()">↩️ 1つ戻す</button>
     <button style="background:#e63946" onclick="resetScore()">🗑️ 点数リセット</button>
   </div>
+
   <div class="box">
     <div style="font-weight:bold;font-size:19px;margin-bottom:8px">🏆 ランキング登録</div>
     <input id="playerName" type="text" placeholder="なまえ" style="width:55%">
     <select id="playerCat"><option value="一般">一般</option><option value="キッズ">キッズ</option></select>
     <button onclick="saveRank()" style="background:#1d3557;color:#fff;width:100%;margin-top:8px">この点数で登録する</button>
   </div>
+
   <div class="box">
     <div class="tabs">
       <button id="t0" class="tab act" onclick="swTab('all')">すべて</button>
       <button id="t1" class="tab" onclick="swTab('一般')">一般</button>
-      <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</button>
+      <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</option></button>
     </div>
     <table>
       <thead><tr><th>順位</th><th>なまえ</th><th>区分</th><th>点数</th><th>削除</th></tr></thead>
@@ -86,27 +132,42 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
     </table>
   </div>
 </div>
+
+<!-- ページ1: 進行・声かけ -->
 <div id="p1" class="hide">
-  <div class="step"><div class="cus">① 受付・スタート時</div><div class="say">「ボールを2回投げて、倒れたピンの色の合計点を競います！準備ができたらどうぞ！」</div></div>
+  <div class="step"><div class="cus">① 受付・スタート時</div><div class="say">「ボールを2回投げて、倒れたピンの色の合計点を競います！黒いピンはマイナス10点なので気をつけてください！」</div></div>
   <div class="step"><div class="cus">② 1投目のあと</div><div class="say">「ナイスショット！倒れたピンの点数を記録しますね。そのまま2投目もどうぞ！」</div></div>
   <div class="step"><div class="cus">③ 2投目終了・結果発表</div><div class="say">「お疲れさまでした！今回の合計得点はこちらです！」</div><div class="res" id="resScore">合計：0 点</div></div>
 </div>
+
+<!-- ページ2: ピン配置 -->
 <div id="p2" class="hide">
   <div class="lane">
-    <div class="row"><span class="pin p-p">100</span><span class="pin p-b">50</span><span class="pin p-b">50</span><span class="pin p-p">100</span></div>
-    <div class="row"><span class="pin p-r">30</span><span class="pin p-y">20</span><span class="pin p-r">30</span></div>
+    <div class="row"><span class="pin p-p">50</span><span class="pin p-r">40</span><span class="pin p-r">40</span><span class="pin p-p">50</span></div>
+    <div class="row"><span class="pin p-b">30</span><span class="pin p-k">-10</span><span class="pin p-b">30</span></div>
     <div class="row"><span class="pin p-y">20</span><span class="pin p-y">20</span></div>
-    <div class="row"><span class="pin p-w">10</span></div>
+    <div class="row"><span class="pin p-w">0</span></div>
     <div class="throw">⬆️ ここからボールを投げる（2投制）</div>
   </div>
-  <div class="cnt">白1本 / 黄3本 / 赤2本 / 青2本 / 紫2本（計10本）</div>
-  <div class="note">※ 倒れたピンの色ボタンを押して合計点を計算してください</div>
+  <div class="cnt">紫50点 / 赤40点 / 青30点 / 黄20点 / 黒-10点 / 白0点</div>
+  <div class="note">※ カメラ自動読み取り、または下の色ボタンで合計点を計算します</div>
 </div>
+
 <script>
+var PIN_TYPES = [
+  { key: 'purple', label: '紫', pt: 50, mark: '#7209b7' },
+  { key: 'red',    label: '赤', pt: 40, mark: '#e63946' },
+  { key: 'blue',   label: '青', pt: 30, mark: '#1d3557' },
+  { key: 'yellow', label: '黄', pt: 20, mark: '#ffb703' },
+  { key: 'black',  label: '黒', pt: -10, mark: '#212529' },
+  { key: 'white',  label: '白', pt: 0,  mark: '#adb5bd' }
+];
+
 var hist = [];
 var currentTab = 'all';
 var camStream = null;
-var KEY = 'color_pin_ranking_v1';
+var detCounts = { purple: 0, red: 0, blue: 0, yellow: 0, black: 0, white: 0 };
+var KEY = 'color_pin_ranking_v2';
 
 function swPage(idx) {
   for (var i = 0; i < 3; i++) {
@@ -122,7 +183,8 @@ function updateDisplay() {
   var parts = [];
   for (var i = 0; i < hist.length; i++) {
     total += hist[i].pt;
-    parts.push(hist[i].label + '(+' + hist[i].pt + ')');
+    var sign = hist[i].pt > 0 ? '+' + hist[i].pt : String(hist[i].pt);
+    parts.push(hist[i].label + '(' + sign + ')');
   }
   document.getElementById('s').textContent = total;
   document.getElementById('resScore').textContent = '合計：' + total + ' 点';
@@ -199,24 +261,254 @@ function renderRanks() {
   tbody.innerHTML = html;
 }
 
-function toggleCam() {
+/* カメラ起動・色自動読み取り */
+function openCam() {
   var box = document.getElementById('camBox');
-  var vid = document.getElementById('vid');
+  var live = document.getElementById('liveArea');
+  var fallback = document.getElementById('fileFallback');
+  var res = document.getElementById('resultArea');
+  box.className = 'box';
+  res.className = 'hide';
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(function(stream) {
+        camStream = stream;
+        var vid = document.getElementById('vid');
+        vid.srcObject = stream;
+        live.className = '';
+        fallback.className = 'hide';
+      })
+      .catch(function() {
+        live.className = 'hide';
+        fallback.className = '';
+      });
+  } else {
+    live.className = 'hide';
+    fallback.className = '';
+  }
+}
+
+function closeCam() {
   if (camStream) {
     camStream.getTracks().forEach(function(t) { t.stop(); });
     camStream = null;
-    box.className = 'box hide';
-    return;
   }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    alert('このブラウザではカメラを利用できません');
-    return;
+  document.getElementById('camBox').className = 'box hide';
+}
+
+function retakeCam() {
+  openCam();
+}
+
+function captureAndDetect() {
+  var vid = document.getElementById('vid');
+  if (!vid.videoWidth) return;
+  var cvs = document.getElementById('cvs');
+  var w = 320;
+  var h = Math.round(vid.videoHeight * (w / vid.videoWidth));
+  cvs.width = w;
+  cvs.height = h;
+  var ctx = cvs.getContext('2d');
+  ctx.drawImage(vid, 0, 0, w, h);
+
+  if (camStream) {
+    camStream.getTracks().forEach(function(t) { t.stop(); });
+    camStream = null;
   }
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-    .then(function(stream) {
-      camStream = stream;
-      vid.srcObject = stream;
-      box.className = 'box';
-    })
-    .catch(function() {
-      alert('カメラを起動できませんでした（ブラウザのカメラ許可を確認してください）');
+  document.getElementById('liveArea').className = 'hide';
+  document.getElementById('resultArea').className = '';
+  analyzeCanvas(cvs, true);
+}
+
+function handleFile(inp) {
+  if (!inp.files || !inp.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var cvs = document.getElementById('cvs');
+      var w = 320;
+      var h = Math.round(img.height * (w / img.width));
+      cvs.width = w;
+      cvs.height = h;
+      var ctx = cvs.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      document.getElementById('fileFallback').className = 'hide';
+      document.getElementById('resultArea').className = '';
+      analyzeCanvas(cvs, false);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(inp.files[0]);
+}
+
+function classifyPixel(r, g, b) {
+  var rn = r / 255, gn = g / 255, bn = b / 255;
+  var max = Math.max(rn, gn, bn);
+  var min = Math.min(rn, gn, bn);
+  var d = max - min;
+  var v = max;
+  var s = max === 0 ? 0 : d / max;
+
+  if (v < 0.22 && s < 0.45) return 'black';
+  if (v > 0.80 && s < 0.16) return 'white';
+  if (s < 0.28 || v < 0.22) return null;
+
+  var h = 0;
+  if (d !== 0) {
+    if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60;
+    else if (max === gn) h = ((bn - rn) / d + 2) * 60;
+    else h = ((rn - gn) / d + 4) * 60;
+  }
+
+  if (h >= 340 || h < 18) return 'red';
+  if (h >= 35 && h < 72 && bn < Math.min(rn, gn) * 0.7) return 'yellow';
+  if (h >= 190 && h < 255) return 'blue';
+  if (h >= 255 && h < 340) return 'purple';
+  return null;
+}
+
+function analyzeCanvas(cvs, useGuide) {
+  var ctx = cvs.getContext('2d');
+  var w = cvs.width;
+  var h = cvs.height;
+  var imgData = ctx.getImageData(0, 0, w, h).data;
+
+  var gw = 160;
+  var gh = Math.max(60, Math.round(h * (gw / w)));
+  var sx = useGuide ? Math.floor(gw * 0.10) : 0;
+  var ex = useGuide ? Math.ceil(gw * 0.90) : gw;
+  var sy = useGuide ? Math.floor(gh * 0.12) : 0;
+  var ey = useGuide ? Math.ceil(gh * 0.88) : gh;
+
+  var grid = new Array(gw * gh);
+  for (var gy = sy; gy < ey; gy++) {
+    var py = Math.min(h - 1, Math.floor((gy + 0.5) * h / gh));
+    for (var gx = sx; gx < ex; gx++) {
+      var px = Math.min(w - 1, Math.floor((gx + 0.5) * w / gw));
+      var idx = (py * w + px) * 4;
+      grid[gy * gw + gx] = classifyPixel(imgData[idx], imgData[idx + 1], imgData[idx + 2]);
+    }
+  }
+
+  detCounts = { purple: 0, red: 0, blue: 0, yellow: 0, black: 0, white: 0 };
+  var visited = new Uint8Array(gw * gh);
+  var blobs = [];
+  var areaLimitMax = Math.floor((ex - sx) * (ey - sy) * 0.22);
+
+  for (var y = sy; y < ey; y++) {
+    for (var x = sx; x < ex; x++) {
+      var start = y * gw + x;
+      var col = grid[start];
+      if (!col || visited[start]) continue;
+
+      var q = [start];
+      visited[start] = 1;
+      var head = 0;
+      var minX = x, maxX = x, minY = y, maxY = y;
+
+      while (head < q.length) {
+        var cur = q[head++];
+        var cx = cur % gw;
+        var cy = (cur - cx) / gw;
+        if (cx < minX) minX = cx;
+        if (cx > maxX) maxX = cx;
+        if (cy < minY) minY = cy;
+        if (cy > maxY) maxY = cy;
+
+        var neighbors = [cur - 1, cur + 1, cur - gw, cur + gw];
+        for (var k = 0; k < 4; k++) {
+          var nb = neighbors[k];
+          var nx = nb % gw;
+          var ny = (nb - nx) / gw;
+          if (nx >= sx && nx < ex && ny >= sy && ny < ey && !visited[nb] && grid[nb] === col) {
+            visited[nb] = 1;
+            q.push(nb);
+          }
+        }
+      }
+
+      if (q.length >= 16 && q.length <= areaLimitMax) {
+        blobs.push({
+          col: col,
+          x: Math.round(minX * w / gw),
+          y: Math.round(minY * h / gh),
+          w: Math.max(12, Math.round((maxX - minX + 1) * w / gw)),
+          h: Math.max(12, Math.round((maxY - minY + 1) * h / gh))
+        });
+      }
+    }
+  }
+
+  if (useGuide) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.strokeRect(w * 0.10, h * 0.12, w * 0.80, h * 0.76);
+    ctx.setLineDash([]);
+  }
+
+  for (var b = 0; b < blobs.length; b++) {
+    var bl = blobs[b];
+    if (detCounts[bl.col] >= 10) continue;
+    detCounts[bl.col]++;
+    var info = null;
+    for (var t = 0; t < PIN_TYPES.length; t++) {
+      if (PIN_TYPES[t].key === bl.col) info = PIN_TYPES[t];
+    }
+    ctx.strokeStyle = info ? info.mark : '#00ff00';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(bl.x, bl.y, bl.w, bl.h);
+    ctx.fillStyle = info ? info.mark : '#00ff00';
+    ctx.fillRect(bl.x, Math.max(0, bl.y - 16), 24, 16);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText(info ? info.label : '', bl.x + 5, Math.max(12, bl.y - 4));
+  }
+
+  renderDetControls();
+}
+
+function adjDet(key, delta) {
+  detCounts[key] = Math.max(0, Math.min(10, (detCounts[key] || 0) + delta));
+  renderDetControls();
+}
+
+function renderDetControls() {
+  var total = 0;
+  var html = '';
+  for (var i = 0; i < PIN_TYPES.length; i++) {
+    var p = PIN_TYPES[i];
+    var cnt = detCounts[p.key] || 0;
+    total += cnt * p.pt;
+    var ptStr = p.pt > 0 ? '+' + p.pt : String(p.pt);
+    html += '<div class="det-item">' +
+      '<span>' + p.label + ' (' + ptStr + ')</span>' +
+      '<div class="det-adj">' +
+      '<button onclick="adjDet(\'' + p.key + '\',-1)">−</button>' +
+      '<span>' + cnt + '</span>' +
+      '<button onclick="adjDet(\'' + p.key + '\',1)">＋</button>' +
+      '</div></div>';
+  }
+  document.getElementById('detControls').innerHTML = html;
+  var sumSign = total > 0 ? '+' + total : String(total);
+  document.getElementById('detSummary').textContent = '読み取り合計：' + sumSign + ' 点';
+}
+
+function applyDetected() {
+  for (var i = 0; i < PIN_TYPES.length; i++) {
+    var p = PIN_TYPES[i];
+    var cnt = detCounts[p.key] || 0;
+    for (var c = 0; c < cnt; c++) {
+      hist.push({ label: p.label, pt: p.pt });
+    }
+  }
+  updateDisplay();
+  closeCam();
+}
+
+renderRanks();
+</script>
+</body>
+</html>
