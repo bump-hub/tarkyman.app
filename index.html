@@ -13,7 +13,6 @@ body{font-family:sans-serif;text-align:center;background:#f0f4f8;padding:12px;ma
 #h{background:#fff;padding:10px;border-radius:10px;margin-bottom:15px;min-height:22px;font-size:16px;color:#333}
 .g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 button{font-size:19px;font-weight:bold;padding:16px 5px;border:none;border-radius:12px;cursor:pointer}
-button:active{opacity:0.8;transform:scale(0.98)}
 .c{display:flex;gap:10px;margin-top:10px}
 .c button{flex:1;background:#555;color:#fff;padding:14px}
 .cam-btn{background:#ff6b6b;color:#fff;width:100%;margin-bottom:10px;font-size:19px}
@@ -44,50 +43,37 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
 </style>
 </head>
 <body>
-
 <div class="nav">
   <button id="n0" class="act" onclick="swPage(0)">🎳 点数・ランキング</button>
   <button id="n1" onclick="swPage(1)">🗣️ 進行・声かけ</button>
   <button id="n2" onclick="swPage(2)">🎯 ピン配置</button>
 </div>
-
-<!-- ページ0: 点数・ランキング -->
 <div id="p0">
   <button class="cam-btn" onclick="toggleCam()">📷 カメラ確認（オン / オフ）</button>
-  <div id="camBox" class="box hide" style="margin-top:0;margin-bottom:12px;">
-    <video id="vid" autoplay playsinline style="width:100%;border-radius:10px;max-height:220px;object-fit:cover;"></video>
+  <div id="camBox" class="box hide" style="margin-top:0;margin-bottom:12px">
+    <video id="vid" autoplay playsinline style="width:100%;border-radius:10px;max-height:220px;object-fit:cover"></video>
   </div>
-
   <div>現在の合計点数</div>
   <div id="s">0</div>
   <div id="h">履歴：まだ倒していません</div>
-
   <div class="g">
-    <button class="p-w" onclick="addPt('白', 10)">⚪ 白ピン (+10)</button>
-    <button class="p-y" onclick="addPt('黄', 20)">🟡 黄ピン (+20)</button>
-    <button class="p-r" onclick="addPt('赤', 30)">🔴 赤ピン (+30)</button>
-    <button class="p-b" onclick="addPt('青', 50)">🔵 青ピン (+50)</button>
-    <button class="p-p" onclick="addPt('紫', 100)">🟣 紫ピン (+100)</button>
-    <button style="background:#2a9d8f;color:#fff;" onclick="addPt('ストライク', 50)">✨ ボーナス (+50)</button>
+    <button class="p-w" onclick="addPt('白',10)">⚪ 白ピン (+10)</button>
+    <button class="p-y" onclick="addPt('黄',20)">🟡 黄ピン (+20)</button>
+    <button class="p-r" onclick="addPt('赤',30)">🔴 赤ピン (+30)</button>
+    <button class="p-b" onclick="addPt('青',50)">🔵 青ピン (+50)</button>
+    <button class="p-p" onclick="addPt('紫',100)">🟣 紫ピン (+100)</button>
+    <button style="background:#2a9d8f;color:#fff" onclick="addPt('ボーナス',50)">✨ ボーナス (+50)</button>
   </div>
-
   <div class="c">
     <button onclick="undo()">↩️ 1つ戻す</button>
-    <button style="background:#e63946;" onclick="resetScore()">🗑️ 点数リセット</button>
+    <button style="background:#e63946" onclick="resetScore()">🗑️ 点数リセット</button>
   </div>
-
   <div class="box">
-    <div style="font-weight:bold;font-size:19px;margin-bottom:8px;">🏆 ランキング登録</div>
-    <div>
-      <input id="playerName" type="text" placeholder="なまえ（例：たろう）" style="width:60%;">
-      <select id="playerCat">
-        <option value="一般">一般</option>
-        <option value="キッズ">キッズ</option>
-      </select>
-    </div>
-    <button onclick="saveRank()" style="background:#1d3557;color:#fff;width:100%;margin-top:8px;">この点数で登録する</button>
+    <div style="font-weight:bold;font-size:19px;margin-bottom:8px">🏆 ランキング登録</div>
+    <input id="playerName" type="text" placeholder="なまえ" style="width:55%">
+    <select id="playerCat"><option value="一般">一般</option><option value="キッズ">キッズ</option></select>
+    <button onclick="saveRank()" style="background:#1d3557;color:#fff;width:100%;margin-top:8px">この点数で登録する</button>
   </div>
-
   <div class="box">
     <div class="tabs">
       <button id="t0" class="tab act" onclick="swTab('all')">すべて</button>
@@ -95,80 +81,142 @@ th,td{padding:10px 5px;border-bottom:1px solid #eee;font-size:18px}
       <button id="t2" class="tab" onclick="swTab('キッズ')">キッズ</button>
     </div>
     <table>
-      <thead>
-        <tr>
-          <th>順位</th>
-          <th>なまえ</th>
-          <th>区分</th>
-          <th>点数</th>
-          <th>削除</th>
-        </tr>
-      </thead>
+      <thead><tr><th>順位</th><th>なまえ</th><th>区分</th><th>点数</th><th>削除</th></tr></thead>
       <tbody id="rankBody"></tbody>
     </table>
   </div>
 </div>
-
-<!-- ページ1: 進行・声かけ -->
 <div id="p1" class="hide">
-  <div class="step">
-    <div class="cus">① 受付・スタート時</div>
-    <div class="say">「ボールを2回投げて、倒れたピンの色の合計点を競います！準備ができたらどうぞ！」</div>
-  </div>
-  <div class="step">
-    <div class="cus">② 1投目のあと</div>
-    <div class="say">「ナイスショット！倒れたピンの点数を記録しますね。そのまま2投目もどうぞ！」</div>
-  </div>
-  <div class="step">
-    <div class="cus">③ 2投目終了・結果発表</div>
-    <div class="say">「お疲れさまでした！今回の合計得点はこちらです！」</div>
-    <div class="res" id="resScore">合計：0 点</div>
-  </div>
+  <div class="step"><div class="cus">① 受付・スタート時</div><div class="say">「ボールを2回投げて、倒れたピンの色の合計点を競います！準備ができたらどうぞ！」</div></div>
+  <div class="step"><div class="cus">② 1投目のあと</div><div class="say">「ナイスショット！倒れたピンの点数を記録しますね。そのまま2投目もどうぞ！」</div></div>
+  <div class="step"><div class="cus">③ 2投目終了・結果発表</div><div class="say">「お疲れさまでした！今回の合計得点はこちらです！」</div><div class="res" id="resScore">合計：0 点</div></div>
 </div>
-
-<!-- ページ2: ピン配置 -->
 <div id="p2" class="hide">
   <div class="lane">
-    <div class="row">
-      <span class="pin p-p">100</span>
-      <span class="pin p-b">50</span>
-      <span class="pin p-b">50</span>
-      <span class="pin p-p">100</span>
-    </div>
-    <div class="row">
-      <span class="pin p-r">30</span>
-      <span class="pin p-y">20</span>
-      <span class="pin p-r">30</span>
-    </div>
-    <div class="row">
-      <span class="pin p-y">20</span>
-      <span class="pin p-y">20</span>
-    </div>
-    <div class="row">
-      <span class="pin p-w">10</span>
-    </div>
+    <div class="row"><span class="pin p-p">100</span><span class="pin p-b">50</span><span class="pin p-b">50</span><span class="pin p-p">100</span></div>
+    <div class="row"><span class="pin p-r">30</span><span class="pin p-y">20</span><span class="pin p-r">30</span></div>
+    <div class="row"><span class="pin p-y">20</span><span class="pin p-y">20</span></div>
+    <div class="row"><span class="pin p-w">10</span></div>
     <div class="throw">⬆️ ここからボールを投げる（2投制）</div>
   </div>
   <div class="cnt">白1本 / 黄3本 / 赤2本 / 青2本 / 紫2本（計10本）</div>
   <div class="note">※ 倒れたピンの色ボタンを押して合計点を計算してください</div>
 </div>
-
 <script>
-let hist = [];
-let currentTab = 'all';
-let camStream = null;
-const STORAGE_KEY = 'color_pin_ranking_v1';
+var hist = [];
+var currentTab = 'all';
+var camStream = null;
+var KEY = 'color_pin_ranking_v1';
 
 function swPage(idx) {
-  for (let i = 0; i < 3; i++) {
-    document.getElementById('p' + i).classList.toggle('hide', i !== idx);
-    document.getElementById('n' + i).classList.toggle('act', i === idx);
+  for (var i = 0; i < 3; i++) {
+    var p = document.getElementById('p' + i);
+    var n = document.getElementById('n' + i);
+    if (i === idx) { p.className = ''; n.className = 'act'; }
+    else { p.className = 'hide'; n.className = ''; }
   }
 }
 
 function updateDisplay() {
-  const total = hist.reduce((sum, item) => sum + item.pt, 0);
+  var total = 0;
+  var parts = [];
+  for (var i = 0; i < hist.length; i++) {
+    total += hist[i].pt;
+    parts.push(hist[i].label + '(+' + hist[i].pt + ')');
+  }
   document.getElementById('s').textContent = total;
   document.getElementById('resScore').textContent = '合計：' + total + ' 点';
-  document.getElementById('h').textContent = hist.length
-    ? '履歴：' + hist
+  document.getElementById('h').textContent = parts.length ? '履歴：' + parts.join(' → ') : '履歴：まだ倒していません';
+}
+
+function addPt(label, pt) {
+  hist.push({ label: label, pt: pt });
+  updateDisplay();
+}
+
+function undo() {
+  hist.pop();
+  updateDisplay();
+}
+
+function resetScore() {
+  hist = [];
+  updateDisplay();
+}
+
+function getRanks() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+  catch (e) { return []; }
+}
+
+function saveRank() {
+  var inp = document.getElementById('playerName');
+  var name = inp.value.trim();
+  var cat = document.getElementById('playerCat').value;
+  var score = 0;
+  for (var i = 0; i < hist.length; i++) score += hist[i].pt;
+  if (!name) { alert('なまえを入力してください'); return; }
+  var list = getRanks();
+  list.push({ id: Date.now(), name: name, cat: cat, score: score });
+  list.sort(function(a, b) { return b.score - a.score; });
+  localStorage.setItem(KEY, JSON.stringify(list));
+  inp.value = '';
+  resetScore();
+  renderRanks();
+}
+
+function delRank(id) {
+  if (!confirm('削除しますか？')) return;
+  var list = getRanks().filter(function(x) { return x.id !== id; });
+  localStorage.setItem(KEY, JSON.stringify(list));
+  renderRanks();
+}
+
+function swTab(tab) {
+  currentTab = tab;
+  document.getElementById('t0').className = tab === 'all' ? 'tab act' : 'tab';
+  document.getElementById('t1').className = tab === '一般' ? 'tab act' : 'tab';
+  document.getElementById('t2').className = tab === 'キッズ' ? 'tab act' : 'tab';
+  renderRanks();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderRanks() {
+  var tbody = document.getElementById('rankBody');
+  var list = getRanks().filter(function(x) { return currentTab === 'all' || x.cat === currentTab; });
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:#888">まだ記録がありません</td></tr>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var x = list[i];
+    html += '<tr><td><b>' + (i + 1) + '位</b></td><td>' + esc(x.name) + '</td><td>' + esc(x.cat) + '</td><td><b>' + x.score + '点</b></td><td><button class="del" onclick="delRank(' + x.id + ')">削除</button></td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function toggleCam() {
+  var box = document.getElementById('camBox');
+  var vid = document.getElementById('vid');
+  if (camStream) {
+    camStream.getTracks().forEach(function(t) { t.stop(); });
+    camStream = null;
+    box.className = 'box hide';
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert('このブラウザではカメラを利用できません');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(function(stream) {
+      camStream = stream;
+      vid.srcObject = stream;
+      box.className = 'box';
+    })
+    .catch(function() {
+      alert('カメラを起動できませんでした（ブラウザのカメラ許可を確認してください）');
